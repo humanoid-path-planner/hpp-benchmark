@@ -112,36 +112,36 @@ def test_scene(scene, seed, capfd):
             faulthandler.cancel_dump_traceback_later()
 
     reports = {}
-    for stage, path, labelled in (
-        ("planned", planned, not mrrt),
-        ("GraphRandomShortcut", shortcut, not mrrt),
-        ("EnforceTransitionSemantic", semantic, True),
-        ("ManipulationSpline", spline, True),
+    for stage, path, labelled, smoothed in (
+        ("planned", planned, not mrrt, False),
+        ("GraphRandomShortcut", shortcut, not mrrt, False),
+        ("EnforceTransitionSemantic", semantic, True, False),
+        ("ManipulationSpline", spline, True, True),
     ):
-        report = check_path(path, graph, labelled)
+        report = check_path(path, graph, labelled, smoothed)
         reports[stage] = report
         assert not report.failures, (stage, report.failures[:5])
         # Leaves join within the constraint solver precision.
         assert report.gap <= graph.errorThreshold(), (stage, report.gap)
-    smoothed = reports["EnforceTransitionSemantic" if mrrt else "GraphRandomShortcut"]
-    merged = reports["ManipulationSpline"].transitions != smoothed.transitions
+    unsmoothed = reports["EnforceTransitionSemantic" if mrrt else "GraphRandomShortcut"]
+    merged = reports["ManipulationSpline"].transitions != unsmoothed.transitions
     assert not merged or is_subsequence(
-        reports["ManipulationSpline"].transitions, smoothed.transitions
-    ), (reports["ManipulationSpline"].transitions, smoothed.transitions)
+        reports["ManipulationSpline"].transitions, unsmoothed.transitions
+    ), (reports["ManipulationSpline"].transitions, unsmoothed.transitions)
     for path in (shortcut, semantic, spline):
         assert distance(robot, path.initial(), planned.initial()) < 1e-8
         assert distance(robot, path.end(), planned.end()) < 1e-8
     assert planning <= budget, planning
     assert smoothing <= smoothing_budget, smoothing
 
+    relabelled = reports["EnforceTransitionSemantic"].mislabelled
+    # M-RRT paths are labelled by EnforceTransitionSemantic.
+    if mrrt and relabelled:
+        pytest.xfail(f"{KNOWN_LABELS}: {relabelled[:3]}")
     mislabelled = reports["ManipulationSpline"].mislabelled
-    if mrrt and mislabelled:
-        pytest.xfail(f"{KNOWN_LABELS}: {mislabelled[:3]}")
     assert not mislabelled, mislabelled[:5]
     if merged:
-        pytest.xfail(f"{KNOWN_MERGE}: {smoothed.transitions}")
+        pytest.xfail(f"{KNOWN_MERGE}: {unsmoothed.transitions}")
     # Relabelling a correctly labelled path must keep its labels.
-    if not mrrt and reports["EnforceTransitionSemantic"].mislabelled:
-        pytest.xfail(
-            f"{KNOWN_LABELS}: {reports['EnforceTransitionSemantic'].mislabelled[:3]}"
-        )
+    if relabelled:
+        pytest.xfail(f"{KNOWN_LABELS}: {relabelled[:3]}")

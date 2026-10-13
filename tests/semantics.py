@@ -37,7 +37,7 @@ class Report:
     mislabelled: list = field(default_factory=list)
 
 
-def check_path(path, graph, labelled=True, samples=21):
+def check_path(path, graph, labelled=True, smoothed=False, samples=21):
     """Check that every leaf follows its transition.
 
     Each sample of a leaf satisfies the transition constraints with the
@@ -46,7 +46,9 @@ def check_path(path, graph, labelled=True, samples=21):
     and ends in its target state, as required to read gripper actions from
     transition names. Planners may traverse transitions backwards or stop
     before their target state, until EnforceTransitionSemantic relabels the
-    leaves.
+    leaves. If smoothed, only the path ends and the junctions where the
+    containing state changes are checked: ManipulationSpline joins the
+    transitions within a state and may cut through their waypoint states.
     """
     flat = flatten(path)
     report = Report()
@@ -75,11 +77,16 @@ def check_path(path, graph, labelled=True, samples=21):
             runs.append([i, name, q0, q1, transition])
         previous = q1
         cursor += length
-    for i, name, q0, q1, transition in runs:
+    states = [graph.getContainingNode(run[4]) for run in runs]
+    for k, (i, name, q0, q1, transition) in enumerate(runs):
         report.transitions.append(name)
+        if not labelled:
+            continue
         source, target = graph.getNodesConnectedByTransition(transition)
-        if labelled and not (
-            in_state(graph, source, q0) and in_state(graph, target, q1)
+        start = not smoothed or k == 0 or states[k - 1] != states[k]
+        end = not smoothed or k == len(runs) - 1 or states[k + 1] != states[k]
+        if (start and not in_state(graph, source, q0)) or (
+            end and not in_state(graph, target, q1)
         ):
             report.mislabelled.append(
                 f"leaf {i} {name}: does not lead from {source} to {target}"
