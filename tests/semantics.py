@@ -53,11 +53,14 @@ def check_path(path, graph, labelled=True, smoothed=False, samples=21):
     flat = flatten(path)
     report = Report()
     runs = []
-    cursor, previous = 0.0, None
+    previous = None
     for i in range(flat.numberPaths()):
         leaf = flat.pathAtRank(i)
         length = leaf.length()
-        transition = graph.transitionAtParam(flat, cursor + length / 2)
+        # A parameter on the whole path misses leaves without motion.
+        single = Vector(flat.outputSize(), flat.outputDerivativeSize())
+        single.appendPath(leaf)
+        transition = graph.transitionAtParam(single, 0.0)
         name = transition.name()
         q0, q1 = leaf(0.0)[0], leaf(length)[0]
         for t in np.linspace(0.0, length, samples):
@@ -76,7 +79,6 @@ def check_path(path, graph, labelled=True, smoothed=False, samples=21):
         else:
             runs.append([i, name, q0, q1, transition])
         previous = q1
-        cursor += length
     states = [graph.getContainingNode(run[4]) for run in runs]
     for k, (i, name, q0, q1, transition) in enumerate(runs):
         report.transitions.append(name)
