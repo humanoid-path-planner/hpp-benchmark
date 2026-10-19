@@ -32,6 +32,9 @@ SCENES = {
 }
 # Planning budget, in multiples of the mean time of the latest record.
 BUDGET_FACTOR = 10.0
+# M-RRT solve times have a heavy tail: about 9 % of ur3-spheres solves exceed
+# ten times its recorded mean.
+PLANNING_BUDGET = {"ur3-spheres": 180.0}
 # Recorded benchmarks do not include smoothing: this bound catches pathological
 # slowdowns. Known issue: ManipulationSpline takes minutes on romeo.
 SMOOTHING_BUDGET = {"romeo-placard-spf": 1200.0}
@@ -81,7 +84,7 @@ def test_scene(scene, seed, capfd):
     name, ns = scene
     problem, graph, robot = ns["problem"], ns["cg"], ns["robot"]
     planner = ns[SCENES[name]]
-    budget = BUDGET_FACTOR * recorded_time(name)
+    budget = PLANNING_BUDGET.get(name, BUDGET_FACTOR * recorded_time(name))
     smoothing_budget = SMOOTHING_BUDGET.get(name, DEFAULT_SMOOTHING_BUDGET)
     # StatesPathFinder labels its leaves; M-RRT leaves are labelled by
     # EnforceTransitionSemantic.
