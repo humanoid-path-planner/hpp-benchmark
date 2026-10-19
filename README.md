@@ -34,10 +34,12 @@ generator stops and the error is available in this file.
 
 `tests/` checks the manipulation scenes of `future/` with pytest. Each script
 builds its problem (`-N 0`); a path is planned, shortcut, relabelled by
-`EnforceTransitionSemantic` for M-RRT, and smoothed by `ManipulationSpline`.
-The tests check transition semantics, constraint residuals and continuity at
-each stage, and a planning time of at most ten times the mean of the latest
-record of the scene.
+`EnforceTransitionSemantic` for M-RRT, smoothed by `ManipulationSpline`, and
+timed by TOPPRA if hpp-toppra is installed. The tests check transition
+semantics, constraint residuals and continuity at each stage, a planning time
+of at most ten times the mean of the latest record of the scene, and the
+velocity and acceleration bounds of the timed path, stopped where the
+containing state changes.
 
 ```
 pytest tests                          # seeds 1, 2 and 3

@@ -1,4 +1,5 @@
-"""Graph semantics, constraint residuals and continuity of manipulation paths."""
+"""Graph semantics, constraint residuals, continuity and timing bounds of
+manipulation paths."""
 
 from dataclasses import dataclass, field
 
@@ -94,3 +95,33 @@ def check_path(path, graph, labelled=True, smoothed=False, samples=21):
                 f"leaf {i} {name}: does not lead from {source} to {target}"
             )
     return report
+
+
+def timing_maxima(path, graph, velocity_limits, joints, samples=101):
+    """Maximum velocity ratio and acceleration over the leaves, and maximum
+    speed where the robot stops: at the path ends and where the state
+    containing the transitions changes."""
+    flat = flatten(path)
+    ratio = acceleration = 0.0
+    stops, cursor, state = [], 0.0, None
+    for i in range(flat.numberPaths()):
+        leaf = flat.pathAtRank(i)
+        length = leaf.length()
+        for t in np.linspace(0.0, length, samples):
+            v = np.asarray(leaf.derivative(float(t), 1))[joints]
+            a = np.asarray(leaf.derivative(float(t), 2))[joints]
+            ratio = max(ratio, float((np.abs(v) / velocity_limits).max()))
+            acceleration = max(acceleration, float(np.abs(a).max()))
+        transition = graph.transitionAtParam(flat, cursor + length / 2)
+        if graph.getContainingNode(transition) != state:
+            state = graph.getContainingNode(transition)
+            stops.append(cursor)
+        cursor += length
+    stops.append(cursor)
+    # Both one-sided speeds around each stop.
+    boundary = max(
+        float(np.abs(np.asarray(flat.derivative(t, 1))[joints]).max())
+        for stop in stops
+        for t in (max(stop - 1e-9, 0.0), min(stop + 1e-9, cursor))
+    )
+    return dict(velocity_ratio=ratio, acceleration=acceleration, boundary=boundary)
