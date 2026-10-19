@@ -42,7 +42,7 @@ def check_path(path, graph, labelled=True, smoothed=False, samples=21):
     """Check that every leaf follows its transition.
 
     Each sample of a leaf satisfies the transition constraints with the
-    right-hand side of the leaf start. If labelled, each run of consecutive
+    right-hand side stored in the leaf. If labelled, each run of consecutive
     leaves with the same transition also starts in the transition source state
     and ends in its target state, as required to read gripper actions from
     transition names. Planners may traverse transitions backwards or stop
@@ -64,10 +64,15 @@ def check_path(path, graph, labelled=True, smoothed=False, samples=21):
         transition = graph.transitionAtParam(single, 0.0)
         name = transition.name()
         q0, q1 = leaf(0.0)[0], leaf(length)[0]
+        # The leaf start satisfies the right-hand side stored in the leaf only
+        # within the error threshold: a right-hand side taken there differs.
+        constraints = leaf.constraints()
+        solver = constraints.configProjector().solver()
         for t in np.linspace(0.0, length, samples):
-            q = leaf(float(t))[0]
-            error, ok = graph.getConfigErrorForTransitionLeaf(transition, q0, q)
-            residual = float(np.abs(error).max()) if len(error) else 0.0
+            q, projected = leaf(float(t))
+            ok = projected and constraints.isSatisfied(q)
+            errors = [e for _, e, _, _ in solver.describeError(q)[0] if len(e)]
+            residual = max((float(np.abs(e).max()) for e in errors), default=0.0)
             report.residual = max(report.residual, residual)
             if not ok:
                 report.failures.append(
