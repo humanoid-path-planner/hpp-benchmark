@@ -7,10 +7,11 @@ import numpy as np
 import pinocchio
 from pyhpp.core.path import Vector
 
-# Known defect: EnforceTransitionSemantic relabels each leaf alone. When a
-# transition spans several leaves, inner leaves start or end outside both
-# states and get another label, such as a grasp transition inside a release.
-KNOWN_LABELS = "EnforceTransitionSemantic relabelled leaves of split transitions"
+# Known defect: EnforceTransitionSemantic keeps the label of a leaf with only
+# one end in the transition states, such as an M-RRT extension stopped by a
+# collision just after leaving a waypoint state, instead of using the loop of
+# the containing state.
+KNOWN_LABELS = "EnforceTransitionSemantic kept labels of leaves with one end outside"
 
 
 def flatten(path):
