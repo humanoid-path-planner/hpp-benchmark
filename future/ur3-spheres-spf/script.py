@@ -14,6 +14,7 @@ from pyhpp.manipulation.constraint_graph_factory import ConstraintGraphFactory
 from pyhpp.manipulation import (
     Device,
     Graph,
+    GraphPathValidation,
     Problem,
     ProgressiveProjector,
     urdf,
@@ -281,7 +282,8 @@ for i in range(nSphere):
     )
 
 problem.steeringMethod(Straight(problem))
-problem.pathValidation(Dichotomy(robot, 0))
+problem.pathValidation(GraphPathValidation(Dichotomy(robot, 0)))
+problem.pathValidationFactory(Dichotomy(robot, 0))
 
 # need to set path projector due to implicit constraints added above
 problem.pathProjector(ProgressiveProjector(

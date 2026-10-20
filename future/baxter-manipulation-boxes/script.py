@@ -12,6 +12,7 @@ from pyhpp.manipulation import Device, Graph, Problem, urdf, ManipulationPlanner
 from pyhpp.manipulation import (
     RandomShortcut as ManipRandomShortcut,
     EnforceTransitionSemantic,
+    GraphPathValidation,
     GraphRandomShortcut,
     GraphPartialShortcut,
 )
@@ -88,7 +89,8 @@ cg = Graph("graph", robot, problem)
 # Set error threshold and max iterations
 cg.errorThreshold(1e-3)
 cg.maxIterations(40)
-problem.pathValidation(Dichotomy(robot, 0.0))
+problem.pathValidation(GraphPathValidation(Dichotomy(robot, 0.0)))
+problem.pathValidationFactory(Dichotomy(robot, 0.0))
 
 q_init = robot.currentConfiguration()
 
