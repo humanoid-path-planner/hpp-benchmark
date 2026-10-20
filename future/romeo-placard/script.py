@@ -6,8 +6,8 @@ import numpy as np
 import datetime as dt
 
 from pyhpp.manipulation.constraint_graph_factory import ConstraintGraphFactory, Rule
-from pyhpp.manipulation import Device, Graph, Problem, urdf, ManipulationPlanner
-from pyhpp.core import Straight, ProgressiveProjector
+from pyhpp.manipulation import Device, Graph, GraphPathValidation, Problem, urdf, ManipulationPlanner
+from pyhpp.core import Dichotomy, Straight, ProgressiveProjector
 from pyhpp.constraints import Transformation, LockedJoint
 from pyhpp.core.static_stability_constraint_factory import (
     StaticStabilityConstraintsFactory,
@@ -159,6 +159,8 @@ factory_cg.generate()
 # Add balance constraints and locked hands to graph
 all_graph_constraints = list(graphConstraints.values()) + balanceConstraints
 cg.addNumericalConstraintsToGraph(all_graph_constraints)
+problem.pathValidation(GraphPathValidation(Dichotomy(robot, 0.0)))
+problem.pathValidationFactory(Dichotomy(robot, 0.0))
 cg.initialize()
 
 # Define initial and final configurations

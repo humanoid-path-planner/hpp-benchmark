@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 
 from pyhpp.manipulation.constraint_graph_factory import ConstraintGraphFactory, Rule
-from pyhpp.manipulation import Device, Graph, Problem, urdf, ManipulationPlanner
+from pyhpp.manipulation import Device, Graph, GraphPathValidation, Problem, urdf, ManipulationPlanner
 from pyhpp.core import Dichotomy, Straight
 from pyhpp.constraints import LockedJoint
 from pinocchio import SE3
@@ -106,7 +106,8 @@ cg.setWeight(cg.getTransition('Loop | f'), 1)
 cg.setWeight(cg.getTransition('Loop | 0-0'), 1)
 
 problem.steeringMethod(Straight(problem))
-problem.pathValidation(Dichotomy(robot, 0.0))
+problem.pathValidation(GraphPathValidation(Dichotomy(robot, 0.0)))
+problem.pathValidationFactory(Dichotomy(robot, 0.0))
 
 cg.initialize()
 

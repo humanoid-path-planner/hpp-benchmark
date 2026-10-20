@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 
 from pyhpp.manipulation.constraint_graph_factory import ConstraintGraphFactory, Rule
-from pyhpp.manipulation import Device, Graph, Problem, urdf, StatesPathFinder
+from pyhpp.manipulation import Device, Graph, GraphPathValidation, Problem, urdf, StatesPathFinder
 from pyhpp.core import Dichotomy, Straight, ProgressiveProjector
 from pyhpp.constraints import LockedJoint
 from pinocchio import SE3
@@ -125,7 +125,8 @@ factory.generate()
 cg.addNumericalConstraintsToGraph([constraints[c] for c in lockAll])
 
 problem.steeringMethod(Straight(problem))
-problem.pathValidation(Dichotomy(robot, 0.0))
+problem.pathValidation(GraphPathValidation(Dichotomy(robot, 0.0)))
+problem.pathValidationFactory(Dichotomy(robot, 0.0))
 problem.pathProjector(ProgressiveProjector(
     problem.distance(), problem.steeringMethod(), 0.2
 ))
