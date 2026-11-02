@@ -34,7 +34,7 @@ generator stops and the error is available in this file.
 
 `tests/` checks the manipulation scenes of `future/` with pytest. Each script
 builds its problem (`-N 0`); a path is planned, shortcut, relabelled by
-`EnforceTransitionSemantic` for M-RRT, smoothed by `ManipulationSpline`, and
+`EnforceTransitionSemantic` for M-RRT, smoothed by `SplineGradientBased`, and
 timed by TOPPRA if hpp-toppra is installed. The tests check transition
 semantics, constraint residuals and continuity at each stage, a planning time
 of at most ten times the mean of the latest record of the scene, and the

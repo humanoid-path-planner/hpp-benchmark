@@ -19,7 +19,7 @@ import pytest
 from pyhpp.manipulation import (
     EnforceTransitionSemantic,
     GraphRandomShortcut,
-    ManipulationSpline,
+    SplineGradientBased_bezier3,
 )
 from semantics import KNOWN_LABELS, check_path, distance, timing_maxima
 
@@ -43,15 +43,15 @@ BUDGET_FACTOR = 10.0
 # ten times its recorded mean.
 PLANNING_BUDGET = {"ur3-spheres": 180.0}
 # Recorded benchmarks do not include smoothing: this bound catches pathological
-# slowdowns. Known issue: ManipulationSpline takes minutes on romeo.
+# slowdowns. Known issue: SplineGradientBased takes minutes on romeo.
 SMOOTHING_BUDGET = {"romeo-placard-spf": 1200.0}
 DEFAULT_SMOOTHING_BUDGET = 180.0
 SLOW = {"romeo-placard-spf"}
-# Known defect: ManipulationSpline joins consecutive transitions within a state
+# Known defect: SplineGradientBased joins consecutive transitions within a state
 # into one spline labelled with the first, dropping the others.
-KNOWN_MERGE = "ManipulationSpline dropped transitions within a state"
+KNOWN_MERGE = "SplineGradientBased dropped transitions within a state"
 # Known defect: Toppra skips the portions without motion, and their
-# transitions, such as a grasp kept by ManipulationSpline.
+# transitions, such as a grasp kept by SplineGradientBased.
 KNOWN_DROP = "Toppra dropped transitions without motion"
 # TOPPRA bounds, applied to the joints with finite velocity limits, and speed
 # below which the robot is considered stopped.
@@ -137,7 +137,7 @@ def test_scene(scene, seed, capfd):
             start = time.perf_counter()
             shortcut = GraphRandomShortcut(problem).optimize(planned)
             semantic = EnforceTransitionSemantic(problem).optimize(shortcut)
-            smoother = ManipulationSpline(problem)
+            smoother = SplineGradientBased_bezier3(problem)
             smoother.checkJointBound = ns["bounded"]
             spline = smoother.optimize(semantic if mrrt else shortcut)
             smoothing = time.perf_counter() - start
@@ -163,7 +163,7 @@ def test_scene(scene, seed, capfd):
         ("planned", planned, not mrrt, False),
         ("GraphRandomShortcut", shortcut, not mrrt, False),
         ("EnforceTransitionSemantic", semantic, True, False),
-        ("ManipulationSpline", spline, True, True),
+        ("SplineGradientBased", spline, True, True),
     ):
         report = check_path(path, graph, labelled, smoothed)
         reports[stage] = report
@@ -174,10 +174,10 @@ def test_scene(scene, seed, capfd):
         report = check_path(timed, graph, True, True)
         assert not report.failures, ("Toppra", report.failures[:5])
         assert report.gap <= graph.errorThreshold(), ("Toppra", report.gap)
-        dropped = report.transitions != reports["ManipulationSpline"].transitions
+        dropped = report.transitions != reports["SplineGradientBased"].transitions
         assert not dropped or is_subsequence(
-            report.transitions, reports["ManipulationSpline"].transitions
-        ), (report.transitions, reports["ManipulationSpline"].transitions)
+            report.transitions, reports["SplineGradientBased"].transitions
+        ), (report.transitions, reports["SplineGradientBased"].transitions)
         assert distance(robot, timed.initial(), planned.initial()) < 1e-8
         assert distance(robot, timed.end(), planned.end()) < 1e-8
         limits = VELOCITY_SCALE * np.asarray(model.velocityLimit)[velocities]
@@ -188,10 +188,10 @@ def test_scene(scene, seed, capfd):
         assert maxima["boundary"] <= STOP_SPEED, maxima
         assert timing <= smoothing_budget, timing
     unsmoothed = reports["EnforceTransitionSemantic" if mrrt else "GraphRandomShortcut"]
-    merged = reports["ManipulationSpline"].transitions != unsmoothed.transitions
+    merged = reports["SplineGradientBased"].transitions != unsmoothed.transitions
     assert not merged or is_subsequence(
-        reports["ManipulationSpline"].transitions, unsmoothed.transitions
-    ), (reports["ManipulationSpline"].transitions, unsmoothed.transitions)
+        reports["SplineGradientBased"].transitions, unsmoothed.transitions
+    ), (reports["SplineGradientBased"].transitions, unsmoothed.transitions)
     for path in (shortcut, semantic, spline):
         assert distance(robot, path.initial(), planned.initial()) < 1e-8
         assert distance(robot, path.end(), planned.end()) < 1e-8
@@ -202,12 +202,12 @@ def test_scene(scene, seed, capfd):
     # M-RRT paths are labelled by EnforceTransitionSemantic.
     if mrrt and relabelled:
         pytest.xfail(f"{KNOWN_LABELS}: {relabelled[:3]}")
-    mislabelled = reports["ManipulationSpline"].mislabelled
+    mislabelled = reports["SplineGradientBased"].mislabelled
     assert not mislabelled, mislabelled[:5]
     if merged:
         pytest.xfail(f"{KNOWN_MERGE}: {unsmoothed.transitions}")
     if Toppra is not None and dropped:
-        pytest.xfail(f"{KNOWN_DROP}: {reports['ManipulationSpline'].transitions}")
+        pytest.xfail(f"{KNOWN_DROP}: {reports['SplineGradientBased'].transitions}")
     # Relabelling a correctly labelled path must keep its labels.
     if relabelled:
         pytest.xfail(f"{KNOWN_LABELS}: {relabelled[:3]}")

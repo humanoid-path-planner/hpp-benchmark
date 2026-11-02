@@ -49,7 +49,7 @@ def check_path(path, graph, labelled=True, smoothed=False, samples=21):
     transition names. Planners may traverse transitions backwards or stop
     before their target state, until EnforceTransitionSemantic relabels the
     leaves. If smoothed, only the path ends and the junctions where the
-    containing state changes are checked: ManipulationSpline joins the
+    containing state changes are checked: SplineGradientBased joins the
     transitions within a state and may cut through their waypoint states.
     """
     flat = flatten(path)
