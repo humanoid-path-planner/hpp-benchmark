@@ -66,6 +66,15 @@ def is_subsequence(items, sequence):
     return all(item in remaining for item in items)
 
 
+def equivalent(graph, transitions):
+    """Transitions replaced by their equivalent transition, without consecutive
+    repeats: SplineGradientBased smooths equivalent transitions together."""
+    names = [
+        graph.equivalentTransition(graph.getTransition(t)).name() for t in transitions
+    ]
+    return [n for i, n in enumerate(names) if i == 0 or n != names[i - 1]]
+
+
 def limited_joints(model):
     """Names and velocity indices of the joints with positive finite velocity
     limits: the robot, not the objects."""
@@ -188,7 +197,9 @@ def test_scene(scene, seed, capfd):
         assert maxima["boundary"] <= STOP_SPEED, maxima
         assert timing <= smoothing_budget, timing
     unsmoothed = reports["EnforceTransitionSemantic" if mrrt else "GraphRandomShortcut"]
-    merged = reports["SplineGradientBased"].transitions != unsmoothed.transitions
+    merged = equivalent(graph, reports["SplineGradientBased"].transitions) != (
+        equivalent(graph, unsmoothed.transitions)
+    )
     assert not merged or is_subsequence(
         reports["SplineGradientBased"].transitions, unsmoothed.transitions
     ), (reports["SplineGradientBased"].transitions, unsmoothed.transitions)
