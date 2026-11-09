@@ -1,0 +1,237 @@
+format = "hpp-problem/0.1"
+name = "romeo-placard-spf"
+description = """\
+Romeo, standing in static balance, turns a placard held with one hand by regrasping it with both \
+(as script.py)."""
+
+[[robots]]
+name = "romeo"
+urdf = "package://example-robot-data/robots/romeo_description/urdf/romeo.urdf"
+srdf = "package://example-robot-data/robots/romeo_description/srdf/romeo_moveit.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "placard"
+urdf = "package://hpp_environments/urdf/placard.urdf"
+srdf = "package://hpp_environments/srdf/placard.srdf"
+root_joint = "freeflyer"
+
+[joint_bounds]
+"romeo/root_joint" = [-1, 1, -1, 1, 0, 2, -2, 2, -2, 2, -2, 2, -2, 2]
+"placard/root_joint" = [-1, 1, -1, 1, 0, 1.5, -2, 2, -2, 2, -2, 2, -2, 2]
+
+[partial_coms]
+romeo = ["romeo/root_joint"]
+
+[constraints]
+"romeo/LHand" = {type = "locked_joint", joint = "romeo/LHand", value = [1]}
+"romeo/LFinger12" = {type = "locked_joint", joint = "romeo/LFinger12", value = [1.06]}
+"romeo/LFinger13" = {type = "locked_joint", joint = "romeo/LFinger13", value = [1.06]}
+"romeo/LFinger21" = {type = "locked_joint", joint = "romeo/LFinger21", value = [1.06]}
+"romeo/LFinger22" = {type = "locked_joint", joint = "romeo/LFinger22", value = [1.06]}
+"romeo/LFinger23" = {type = "locked_joint", joint = "romeo/LFinger23", value = [1.06]}
+"romeo/LFinger31" = {type = "locked_joint", joint = "romeo/LFinger31", value = [1.06]}
+"romeo/LFinger32" = {type = "locked_joint", joint = "romeo/LFinger32", value = [1.06]}
+"romeo/LFinger33" = {type = "locked_joint", joint = "romeo/LFinger33", value = [1.06]}
+"romeo/LThumb1" = {type = "locked_joint", joint = "romeo/LThumb1", value = [0]}
+"romeo/LThumb2" = {type = "locked_joint", joint = "romeo/LThumb2", value = [1.06]}
+"romeo/LThumb3" = {type = "locked_joint", joint = "romeo/LThumb3", value = [1.06]}
+"romeo/RHand" = {type = "locked_joint", joint = "romeo/RHand", value = [1]}
+"romeo/RFinger12" = {type = "locked_joint", joint = "romeo/RFinger12", value = [1.06]}
+"romeo/RFinger13" = {type = "locked_joint", joint = "romeo/RFinger13", value = [1.06]}
+"romeo/RFinger21" = {type = "locked_joint", joint = "romeo/RFinger21", value = [1.06]}
+"romeo/RFinger22" = {type = "locked_joint", joint = "romeo/RFinger22", value = [1.06]}
+"romeo/RFinger23" = {type = "locked_joint", joint = "romeo/RFinger23", value = [1.06]}
+"romeo/RFinger31" = {type = "locked_joint", joint = "romeo/RFinger31", value = [1.06]}
+"romeo/RFinger32" = {type = "locked_joint", joint = "romeo/RFinger32", value = [1.06]}
+"romeo/RFinger33" = {type = "locked_joint", joint = "romeo/RFinger33", value = [1.06]}
+"romeo/RThumb1" = {type = "locked_joint", joint = "romeo/RThumb1", value = [0]}
+"romeo/RThumb2" = {type = "locked_joint", joint = "romeo/RThumb2", value = [1.06]}
+"romeo/RThumb3" = {type = "locked_joint", joint = "romeo/RThumb3", value = [1.06]}
+
+[constraints.balance]
+type = "static_stability"
+com = "romeo"
+left_ankle = "romeo/LAnkleRoll"
+right_ankle = "romeo/RAnkleRoll"
+# Reference configuration: romeo neutral, placard at (0.4, 0, 1.2).
+config = {joints = {"placard/root_joint" = [0.4, 0, 1.2, 0, 0, 0, 1]}}
+
+[graph]
+name = "graph"
+error_threshold = 0.0002
+max_iterations = 40
+grippers = ["romeo/r_hand", "romeo/l_hand"]
+objects = [{name = "placard", handles = ["placard/low", "placard/high"], contacts = []}]
+
+[[graph.rules]]
+grippers = ["romeo/l_hand", "romeo/r_hand"]
+handles = ["placard/low", ""]
+link = true
+
+[[graph.rules]]
+grippers = ["romeo/l_hand", "romeo/r_hand"]
+handles = ["", "placard/high"]
+link = true
+
+[[graph.rules]]
+grippers = ["romeo/l_hand", "romeo/r_hand"]
+handles = ["placard/low", "placard/high"]
+link = true
+
+[graph.add]
+graph = [
+  "romeo/LHand", "romeo/LFinger12", "romeo/LFinger13", "romeo/LFinger21", "romeo/LFinger22",
+  "romeo/LFinger23", "romeo/LFinger31", "romeo/LFinger32", "romeo/LFinger33", "romeo/LThumb1",
+  "romeo/LThumb2", "romeo/LThumb3", "romeo/RHand", "romeo/RFinger12", "romeo/RFinger13",
+  "romeo/RFinger21", "romeo/RFinger22", "romeo/RFinger23", "romeo/RFinger31", "romeo/RFinger32",
+  "romeo/RFinger33", "romeo/RThumb1", "romeo/RThumb2", "romeo/RThumb3", "balance/pose-left-foot",
+  "balance/pose-right-foot", "balance/relative-com",
+]
+
+[problem]
+steering_method = "Straight"
+path_validation = {type = "Dichotomy", tolerance = 0}
+path_projector = {type = "Progressive", step = 0.05}
+config_validations = ["CollisionValidation"]
+
+# Standing posture, placard held by the left hand at its low handle; the goal
+# turns it by pi about z.
+[init]
+project_on = "romeo/l_hand grasps placard/low"
+
+[init.joints]
+"romeo/root_joint" = [
+  -0.003429678026293006, 7.761615492429529e-05, 0.8333148411182841, -0.08000440760954532,
+  0.06905332841243099, -0.09070086400314036, 0.9902546570793265,
+]
+"romeo/LHipYaw" = 0.2097693637044623
+"romeo/LHipRoll" = 0.19739743868699455
+"romeo/LHipPitch" = -0.6079135018296973
+"romeo/LKneePitch" = 0.8508704420155889
+"romeo/LAnklePitch" = -0.39897628829947995
+"romeo/LAnkleRoll" = -0.05274298289004072
+"romeo/RHipYaw" = 0.20772797293264825
+"romeo/RHipRoll" = 0.1846394290733244
+"romeo/RHipPitch" = -0.49824886682709824
+"romeo/RKneePitch" = 0.5042013065348324
+"romeo/RAnklePitch" = -0.16158420369261683
+"romeo/RAnkleRoll" = -0.039828502509861335
+"romeo/TrunkYaw" = -0.3827070014985058
+"romeo/LShoulderPitch" = -0.24118425356319423
+"romeo/LShoulderYaw" = 1.0157846623463191
+"romeo/LElbowRoll" = 0.5637424355124602
+"romeo/LElbowYaw" = -1.3378817283780955
+"romeo/LWristRoll" = -1.3151786907256797
+"romeo/LWristYaw" = -0.392409481224193
+"romeo/LWristPitch" = 0.11332560818107676
+"romeo/LFinger21" = 1.06
+"romeo/LFinger22" = 1.06
+"romeo/LFinger23" = 1.06
+"romeo/LFinger31" = 1.06
+"romeo/LFinger32" = 1.06
+"romeo/LFinger33" = 1.06
+"romeo/LHand" = 1.0
+"romeo/LFinger12" = 1.06
+"romeo/LFinger13" = 1.06
+"romeo/LThumb1" = -1.06
+"romeo/LThumb2" = 1.06
+"romeo/LThumb3" = 1.06
+"romeo/NeckYaw" = 0.35936687035487364
+"romeo/NeckPitch" = -0.32595302056157444
+"romeo/HeadPitch" = -0.33115291290191723
+"romeo/HeadRoll" = 0.20387672048126043
+"romeo/RShoulderPitch" = 0.9007626913161502
+"romeo/RShoulderYaw" = -0.39038645767349395
+"romeo/RElbowRoll" = 0.31725226129015516
+"romeo/RElbowYaw" = 1.5475253831101246
+"romeo/RWristRoll" = -0.0104572058777634
+"romeo/RWristYaw" = 0.32681856374063933
+"romeo/RWristPitch" = 0.24476959944940427
+"romeo/RFinger21" = 1.06
+"romeo/RFinger22" = 1.06
+"romeo/RFinger23" = 1.06
+"romeo/RFinger31" = 1.06
+"romeo/RFinger32" = 1.06
+"romeo/RFinger33" = 1.06
+"romeo/RHand" = 1.0
+"romeo/RFinger12" = 1.06
+"romeo/RFinger13" = 1.06
+"romeo/RThumb1" = -1.06
+"romeo/RThumb2" = 1.06
+"romeo/RThumb3" = 1.06
+"placard/root_joint" = [0.412075621240969, 0.020809907186176854, 1.056724788359247, 0, 0, 1, 0]
+
+[goal]
+project_on = "romeo/l_hand grasps placard/low"
+
+[goal.joints]
+"romeo/root_joint" = [
+  -0.003429678026293006, 7.761615492429529e-05, 0.8333148411182841, -0.08000440760954532,
+  0.06905332841243099, -0.09070086400314036, 0.9902546570793265,
+]
+"romeo/LHipYaw" = 0.2097693637044623
+"romeo/LHipRoll" = 0.19739743868699455
+"romeo/LHipPitch" = -0.6079135018296973
+"romeo/LKneePitch" = 0.8508704420155889
+"romeo/LAnklePitch" = -0.39897628829947995
+"romeo/LAnkleRoll" = -0.05274298289004072
+"romeo/RHipYaw" = 0.20772797293264825
+"romeo/RHipRoll" = 0.1846394290733244
+"romeo/RHipPitch" = -0.49824886682709824
+"romeo/RKneePitch" = 0.5042013065348324
+"romeo/RAnklePitch" = -0.16158420369261683
+"romeo/RAnkleRoll" = -0.039828502509861335
+"romeo/TrunkYaw" = -0.3827070014985058
+"romeo/LShoulderPitch" = -0.24118425356319423
+"romeo/LShoulderYaw" = 1.0157846623463191
+"romeo/LElbowRoll" = 0.5637424355124602
+"romeo/LElbowYaw" = -1.3378817283780955
+"romeo/LWristRoll" = -1.3151786907256797
+"romeo/LWristYaw" = -0.392409481224193
+"romeo/LWristPitch" = 0.11332560818107676
+"romeo/LFinger21" = 1.06
+"romeo/LFinger22" = 1.06
+"romeo/LFinger23" = 1.06
+"romeo/LFinger31" = 1.06
+"romeo/LFinger32" = 1.06
+"romeo/LFinger33" = 1.06
+"romeo/LHand" = 1.0
+"romeo/LFinger12" = 1.06
+"romeo/LFinger13" = 1.06
+"romeo/LThumb1" = -1.06
+"romeo/LThumb2" = 1.06
+"romeo/LThumb3" = 1.06
+"romeo/NeckYaw" = 0.35936687035487364
+"romeo/NeckPitch" = -0.32595302056157444
+"romeo/HeadPitch" = -0.33115291290191723
+"romeo/HeadRoll" = 0.20387672048126043
+"romeo/RShoulderPitch" = 0.9007626913161502
+"romeo/RShoulderYaw" = -0.39038645767349395
+"romeo/RElbowRoll" = 0.31725226129015516
+"romeo/RElbowYaw" = 1.5475253831101246
+"romeo/RWristRoll" = -0.0104572058777634
+"romeo/RWristYaw" = 0.32681856374063933
+"romeo/RWristPitch" = 0.24476959944940427
+"romeo/RFinger21" = 1.06
+"romeo/RFinger22" = 1.06
+"romeo/RFinger23" = 1.06
+"romeo/RFinger31" = 1.06
+"romeo/RFinger32" = 1.06
+"romeo/RFinger33" = 1.06
+"romeo/RHand" = 1.0
+"romeo/RFinger12" = 1.06
+"romeo/RFinger13" = 1.06
+"romeo/RThumb1" = -1.06
+"romeo/RThumb2" = 1.06
+"romeo/RThumb3" = 1.06
+"placard/root_joint" = [0.412075621240969, 0.020809907186176854, 1.056724788359247, 0, 0, 0, 1]
+
+[planner]
+type = "StatesPathFinder"
+max_iterations = 5000
+
+[planner.parameters]
+"StatesPathFinder/innerPlannerTimeOut" = 0.0
+"StatesPathFinder/innerPlannerMaxIterations" = 100
+"StatesPathFinder/nTriesUntilBacktrack" = 3

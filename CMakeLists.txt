@@ -77,26 +77,32 @@ install(FILES
   )
 install(FILES
   future/baxter-manipulation-boxes/script.py
+  future/baxter-manipulation-boxes/problem.toml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/baxter-manipulation-boxes)
 
 install(FILES
   future/pyrene-on-the-ground/script.py
+  future/pyrene-on-the-ground/problem.toml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/pyrene-on-the-ground)
 
 install(FILES
   future/pr2-in-iai-kitchen/script.py
+  future/pr2-in-iai-kitchen/problem.toml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/pr2-in-iai-kitchen)
 
 install(FILES
   future/pr2-manipulation-kitchen/script.py
+  future/pr2-manipulation-kitchen/problem.toml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/pr2-manipulation-kitchen)
 
 install(FILES
   future/pr2-manipulation-two-hand/script.py
+  future/pr2-manipulation-two-hand/problem.toml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/pr2-manipulation-two-hand)
 
 install(FILES
   future/romeo-placard/script.py
+  future/romeo-placard/problem.toml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/romeo-placard)
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/images/cpp)

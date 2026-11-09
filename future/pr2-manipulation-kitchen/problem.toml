@@ -1,0 +1,82 @@
+format = "hpp-problem/0.1"
+name = "pr2-manipulation-kitchen"
+description = """\
+PR2 moves a box from the kitchen table to the counter with its left hand (as script.py)."""
+
+[[robots]]
+name = "pr2"
+urdf = "package://example-robot-data/robots/pr2_description/urdf/pr2.urdf"
+srdf = "package://example-robot-data/robots/pr2_description/srdf/pr2_manipulation.srdf"
+root_joint = "planar"
+
+[[robots]]
+name = "box"
+urdf = "package://hpp_benchmark/urdf/pr2-manipulation-kitchen/box.urdf"
+srdf = "package://hpp_benchmark/srdf/pr2-manipulation-kitchen/box.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "kitchen_area"
+urdf = "package://hpp_tutorial/urdf/kitchen_area_obstacle.urdf"
+srdf = "package://hpp_tutorial/srdf/kitchen_area.srdf"
+root_joint = "anchor"
+
+[joint_bounds]
+"pr2/root_joint" = [-5, -2, -5.2, -2.7, -2, 2, -2, 2]
+"box/root_joint" = [-5.1, -2, -5.2, -2.7, 0, 1.5, -2, 2, -2, 2, -2, 2, -2, 2]
+
+[constraints]
+l_l_finger = {type = "locked_joint", joint = "pr2/l_gripper_l_finger_joint", value = [0.5]}
+l_r_finger = {type = "locked_joint", joint = "pr2/l_gripper_r_finger_joint", value = [0.5]}
+
+[graph]
+name = "graph"
+error_threshold = 0.001
+max_iterations = 40
+grippers = ["pr2/l_gripper"]
+environment_contacts = [
+  "kitchen_area/pancake_table_table_top", "kitchen_area/white_counter_top_sink",
+]
+objects = [{name = "box", handles = ["box/handle"], contacts = ["box/box_surface"]}]
+rules = [
+  {grippers = ["pr2/l_gripper"], handles = ["box/handle"], link = true},
+  {grippers = [""], handles = [""], link = true},
+]
+add = {graph = ["l_l_finger", "l_r_finger"]}
+
+[graph.weights]
+"Loop | f" = 1
+"Loop | 0-0" = 1
+
+[problem]
+steering_method = "Straight"
+path_validation = {type = "Dichotomy", tolerance = 0}
+config_validations = ["CollisionValidation"]
+
+# Base at (-3.2, -4), left fingers 0.5; box on the table, moved to the counter in the goal.
+[init]
+project_on = "free"
+
+[init.joints]
+"pr2/root_joint" = [-3.2, -4, 1, 0]
+"pr2/torso_lift_joint" = 0.2
+"pr2/l_gripper_l_finger_joint" = 0.5
+"pr2/l_gripper_r_finger_joint" = 0.5
+"box/root_joint" = [-2.5, -4, 0.9, 0, 0.7071067811865476, 0, 0.7071067811865476]
+
+[goal]
+project_on = "free"
+
+[goal.joints]
+"pr2/root_joint" = [-3.2, -4, 1, 0]
+"pr2/l_shoulder_lift_joint" = 0.5
+"pr2/l_elbow_flex_joint" = -0.5
+"pr2/l_gripper_l_finger_joint" = 0.5
+"pr2/l_gripper_r_finger_joint" = 0.5
+"pr2/r_shoulder_lift_joint" = 0.5
+"pr2/r_elbow_flex_joint" = -0.5
+"box/root_joint" = [-4.8, -4.8, 0.9, 0, 0.7071067811865476, 0, 0.7071067811865476]
+
+[planner]
+type = "ManipulationPlanner"
+max_iterations = 5000

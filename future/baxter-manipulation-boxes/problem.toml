@@ -1,0 +1,112 @@
+format = "hpp-problem/0.1"
+name = "baxter-manipulation-boxes"
+description = "Baxter swaps two boxes on a table with either gripper (as script.py)."
+
+[[robots]]
+name = "baxter"
+urdf = "package://example-robot-data/robots/baxter_description/urdf/baxter.urdf"
+srdf = "package://example-robot-data/robots/baxter_description/srdf/baxter_manipulation.srdf"
+root_joint = "anchor"
+pose = [0, 0, 0.926, 0, 0, 0, 1]
+
+[[robots]]
+name = "table"
+urdf = "package://hpp_tutorial/urdf/table.urdf"
+srdf = "package://hpp_tutorial/srdf/table.srdf"
+root_joint = "anchor"
+
+[[robots]]
+name = "box0"
+urdf = "package://hpp_environments/urdf/baxter_benchmark/box.urdf"
+srdf = "package://hpp_environments/srdf/baxter_benchmark/box.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "box1"
+urdf = "package://hpp_environments/urdf/baxter_benchmark/box.urdf"
+srdf = "package://hpp_environments/srdf/baxter_benchmark/box.srdf"
+root_joint = "freeflyer"
+
+[joint_bounds]
+"box0/root_joint" = [-1, 1, -1, 2, 0.6, 1.9, -1, 1, -1, 1, -1, 1, -1, 1]
+"box1/root_joint" = [-1, 1, -1, 2, 0.6, 1.9, -1, 1, -1, 1, -1, 1, -1, 1]
+
+[constraints]
+head_pan = {type = "locked_joint", joint = "baxter/head_pan", value = [0]}
+# Arm locks of the script's dictionary; the factory does not use them.
+"baxter/right_s0" = {type = "locked_joint", joint = "baxter/right_s0", value = [0]}
+"baxter/right_s1" = {type = "locked_joint", joint = "baxter/right_s1", value = [0]}
+"baxter/right_e0" = {type = "locked_joint", joint = "baxter/right_e0", value = [0]}
+"baxter/right_e1" = {type = "locked_joint", joint = "baxter/right_e1", value = [0]}
+"baxter/right_w0" = {type = "locked_joint", joint = "baxter/right_w0", value = [0]}
+"baxter/right_w1" = {type = "locked_joint", joint = "baxter/right_w1", value = [0]}
+"baxter/right_w2" = {type = "locked_joint", joint = "baxter/right_w2", value = [0]}
+"baxter/left_s0" = {type = "locked_joint", joint = "baxter/left_s0", value = [0]}
+"baxter/left_s1" = {type = "locked_joint", joint = "baxter/left_s1", value = [0]}
+"baxter/left_e0" = {type = "locked_joint", joint = "baxter/left_e0", value = [0]}
+"baxter/left_e1" = {type = "locked_joint", joint = "baxter/left_e1", value = [0]}
+"baxter/left_w0" = {type = "locked_joint", joint = "baxter/left_w0", value = [0]}
+"baxter/left_w1" = {type = "locked_joint", joint = "baxter/left_w1", value = [0]}
+"baxter/left_w2" = {type = "locked_joint", joint = "baxter/left_w2", value = [0]}
+
+[constraints.r_gripper_r_finger]
+type = "locked_joint"
+joint = "baxter/r_gripper_r_finger_joint"
+value = [-0.02]
+
+[constraints.r_gripper_l_finger]
+type = "locked_joint"
+joint = "baxter/r_gripper_l_finger_joint"
+value = [0.02]
+
+[constraints.l_gripper_r_finger]
+type = "locked_joint"
+joint = "baxter/l_gripper_r_finger_joint"
+value = [-0.02]
+
+[constraints.l_gripper_l_finger]
+type = "locked_joint"
+joint = "baxter/l_gripper_l_finger_joint"
+value = [0.02]
+
+[graph]
+name = "graph"
+error_threshold = 0.001
+max_iterations = 40
+grippers = ["baxter/r_gripper", "baxter/l_gripper"]
+environment_contacts = ["table/pancake_table_table_top"]
+# The script swaps the object order after loading the boxes.
+objects = [
+  {name = "box1", handles = ["box1/handle2"], contacts = ["box1/box_surface"]},
+  {name = "box0", handles = ["box0/handle2"], contacts = ["box0/box_surface"]},
+]
+rules = [{grippers = [".*"], handles = [".*"], link = true}]
+
+[graph.add]
+graph = [
+  "r_gripper_r_finger", "r_gripper_l_finger", "l_gripper_r_finger", "l_gripper_l_finger",
+  "head_pan",
+]
+
+[problem]
+steering_method = "Straight"
+path_validation = {type = "Dichotomy", tolerance = 0}
+config_validations = ["CollisionValidation"]
+
+# Robot at its neutral configuration; box1 at (0.7, 0, 0.7451), box0 at (0.8, 0, 0.7451), swapped in the goal.
+[init]
+project_on = "free"
+
+[init.joints]
+"box1/root_joint" = [0.7, 0, 0.7451, 0, -0.7071067811865476, 0, 0.7071067811865476]
+"box0/root_joint" = [0.8, 0, 0.7451, 0, -0.7071067811865476, 0, 0.7071067811865476]
+
+[goal]
+project_on = "free"
+
+[goal.joints]
+"box1/root_joint" = [0.8, 0, 0.7451, 0, -0.7071067811865476, 0, 0.7071067811865476]
+"box0/root_joint" = [0.7, 0, 0.7451, 0, -0.7071067811865476, 0, 0.7071067811865476]
+
+[planner]
+type = "ManipulationPlanner"

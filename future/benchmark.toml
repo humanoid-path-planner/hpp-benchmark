@@ -1,0 +1,53 @@
+format = "hpp-benchmark-config/0.1"
+name = "future"
+description = """\
+Problem files of future/, run by generate_problem_benchmark.py as the scripts run them: planning \
+only, 20 rounds, except baxter, whose scripts also time optimizer i mod 5 at round i."""
+runs = 20
+
+[[scenes]]
+problem = "baxter-manipulation-boxes/problem.toml"
+optimizer_cycle = [
+  "GraphPartialShortcut", "GraphRandomShortcut", "core.PartialShortcut", "core.RandomShortcut",
+  "core.SimpleShortcut",
+]
+
+[[scenes]]
+problem = "baxter-manipulation-boxes-spf/problem.toml"
+optimizer_cycle = [
+  "GraphPartialShortcut", "GraphRandomShortcut", "core.PartialShortcut", "core.RandomShortcut",
+  "core.SimpleShortcut",
+]
+
+[[scenes]]
+problem = "construction-set-mrrt/problem.toml"
+
+[[scenes]]
+problem = "pr2-in-iai-kitchen/problem.toml"
+
+[[scenes]]
+problem = "pr2-manipulation-kitchen/problem.toml"
+
+[[scenes]]
+problem = "pr2-manipulation-kitchen-spf/problem.toml"
+
+[[scenes]]
+problem = "pr2-manipulation-two-hand/problem.toml"
+
+[[scenes]]
+problem = "pr2-manipulation-two-hand-spf/problem.toml"
+
+[[scenes]]
+problem = "pyrene-on-the-ground/problem.toml"
+
+[[scenes]]
+problem = "romeo-placard/problem.toml"
+
+[[scenes]]
+problem = "romeo-placard-spf/problem.toml"
+
+[[scenes]]
+problem = "ur3-spheres/problem.toml"
+
+[[scenes]]
+problem = "ur3-spheres-spf/problem.toml"

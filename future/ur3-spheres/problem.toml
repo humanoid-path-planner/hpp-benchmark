@@ -1,0 +1,148 @@
+format = "hpp-problem/0.1"
+name = "ur3-spheres"
+description = "UR3 with a gripper swaps two spheres lying on the ground (as script.py)."
+
+[[robots]]
+name = "ur3"
+urdf = "package://example-robot-data/robots/ur_description/urdf/ur3_gripper.urdf"
+srdf = "package://example-robot-data/robots/ur_description/srdf/ur3_gripper.srdf"
+root_joint = "anchor"
+
+[[robots]]
+name = "sphere0"
+urdf = "package://hpp_environments/urdf/construction_set/sphere.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/sphere.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "sphere1"
+urdf = "package://hpp_environments/urdf/construction_set/sphere.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/sphere.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "ground"
+urdf = "package://hpp_environments/urdf/construction_set/ground.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/ground.srdf"
+root_joint = "anchor"
+
+[joint_bounds]
+"ur3/shoulder_pan_joint" = [-3.141592653589793, 4]
+"ur3/shoulder_lift_joint" = [-3.141592653589793, 0]
+"ur3/elbow_joint" = [-2.6, 2.6]
+"sphere0/root_joint" = [
+  -1, 1, -1, 1, -0.1, 1, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001,
+]
+"sphere1/root_joint" = [
+  -1, 1, -1, 1, -0.1, 1, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001,
+]
+
+[handles]
+"sphere0/handle" = {mask = [1, 1, 1, 0, 1, 1]}
+"sphere1/handle" = {mask = [1, 1, 1, 0, 1, 1]}
+
+[constraints.place_sphere0]
+type = "transformation"
+joint2 = "sphere0/root_joint"
+frame1 = [0, 0, 0.02, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints."place_sphere0/complement"]
+type = "transformation"
+joint2 = "sphere0/root_joint"
+frame1 = [0, 0, 0.02, 0, 0, 0, 1]
+mask = [1, 1, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "Equality"]
+
+[constraints."place_sphere0/hold"]
+type = "locked_joint"
+joint = "sphere0/root_joint"
+value = [0, 0, 0.02, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "EqualToZero", "EqualToZero", "EqualToZero", "Equality"]
+
+[constraints.preplace_sphere0]
+type = "transformation"
+joint2 = "sphere0/root_joint"
+frame1 = [0, 0, 0.1, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints.place_sphere1]
+type = "transformation"
+joint2 = "sphere1/root_joint"
+frame1 = [0, 0, 0.02, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints."place_sphere1/complement"]
+type = "transformation"
+joint2 = "sphere1/root_joint"
+frame1 = [0, 0, 0.02, 0, 0, 0, 1]
+mask = [1, 1, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "Equality"]
+
+[constraints."place_sphere1/hold"]
+type = "locked_joint"
+joint = "sphere1/root_joint"
+value = [0, 0, 0.02, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "EqualToZero", "EqualToZero", "EqualToZero", "Equality"]
+
+[constraints.preplace_sphere1]
+type = "transformation"
+joint2 = "sphere1/root_joint"
+frame1 = [0, 0, 0.1, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[graph]
+name = "graph"
+error_threshold = 0.0001
+max_iterations = 40
+grippers = ["ur3/gripper"]
+objects = [
+  {name = "sphere0", handles = ["sphere0/handle"], contacts = []},
+  {name = "sphere1", handles = ["sphere1/handle"], contacts = []},
+]
+
+[graph.placements.sphere0]
+constraint = "place_sphere0"
+complement = "place_sphere0/complement"
+hold = "place_sphere0/hold"
+preplacement = "preplace_sphere0"
+
+[graph.placements.sphere1]
+constraint = "place_sphere1"
+complement = "place_sphere1/complement"
+hold = "place_sphere1/hold"
+preplacement = "preplace_sphere1"
+
+[graph.add.transitions]
+"ur3/gripper > sphere0/handle | f_23" = ["place_sphere0/complement"]
+"ur3/gripper < sphere0/handle | 0-0_32" = ["place_sphere0/complement"]
+"ur3/gripper > sphere1/handle | f_23" = ["place_sphere1/complement"]
+"ur3/gripper < sphere1/handle | 0-1_32" = ["place_sphere1/complement"]
+
+[problem]
+steering_method = "Straight"
+path_validation = {type = "Dichotomy", tolerance = 0}
+path_projector = {type = "Progressive", step = 0.01}
+
+# Arm at (pi/6, -pi/2, pi/2); spheres at x = 0.2 and 0.3 on the ground, swapped in the goal.
+[init.joints]
+"ur3/shoulder_pan_joint" = 0.5235987755982988
+"ur3/shoulder_lift_joint" = -1.5707963267948966
+"ur3/elbow_joint" = 1.5707963267948966
+"sphere0/root_joint" = [0.2, 0, 0.02, 0, 0, 0, 1]
+"sphere1/root_joint" = [0.3, 0, 0.02, 0, 0, 0, 1]
+
+[goal.joints]
+"ur3/shoulder_pan_joint" = 0.5235987755982988
+"ur3/shoulder_lift_joint" = -1.5707963267948966
+"ur3/elbow_joint" = 1.5707963267948966
+"sphere0/root_joint" = [0.3, 0, 0.02, 0, 0, 0, 1]
+"sphere1/root_joint" = [0.2, 0, 0.02, 0, 0, 0, 1]
+
+[planner]
+type = "ManipulationPlanner"
+max_iterations = 5000
