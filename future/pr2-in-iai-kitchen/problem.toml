@@ -1,0 +1,37 @@
+format = "hpp-problem/0.1"
+name = "pr2-in-iai-kitchen"
+description = "PR2 moves its arms in the IAI kitchen; no manipulation (as script.py)."
+
+[[robots]]
+name = "pr2"
+urdf = "package://example-robot-data/robots/pr2_description/urdf/pr2.urdf"
+srdf = "package://example-robot-data/robots/pr2_description/srdf/pr2.srdf"
+root_joint = "planar"
+
+[[robots]]
+name = "kitchen"
+urdf = "package://hpp_tutorial/urdf/kitchen_area_obstacle.urdf"
+root_joint = "anchor"
+
+[joint_bounds]
+"pr2/root_joint" = [-4, -3, -5, -3, -2, 2, -2, 2]
+
+[problem]
+steering_method = "Straight"
+path_validation = {type = "Dichotomy", tolerance = 0}
+
+# Base at (-3.2, -4); torso up in the init, arms raised in the goal.
+[init.joints]
+"pr2/root_joint" = [-3.2, -4, 1, 0]
+"pr2/torso_lift_joint" = 0.2
+
+[goal.joints]
+"pr2/root_joint" = [-3.2, -4, 1, 0]
+"pr2/l_shoulder_lift_joint" = 0.5
+"pr2/r_shoulder_lift_joint" = 0.5
+"pr2/l_elbow_flex_joint" = -0.5
+"pr2/r_elbow_flex_joint" = -0.5
+
+[planner]
+type = "DiffusingPlanner"
+max_iterations = 5000

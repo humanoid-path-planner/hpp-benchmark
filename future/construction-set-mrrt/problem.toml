@@ -1,0 +1,333 @@
+format = "hpp-problem/0.1"
+name = "construction-set-mrrt"
+description = """\
+Two UR3 assemble two spheres on a cylinder with magnets; the graph only has the states of one \
+assembly sequence (as script.py)."""
+
+[[robots]]
+name = "r0"
+urdf = "package://example-robot-data/robots/ur_description/urdf/ur3_gripper.urdf"
+srdf = "package://example-robot-data/robots/ur_description/srdf/ur3_gripper.srdf"
+root_joint = "anchor"
+pose = [-0.25, 0, 0, 0, 0, 0, 1]
+
+[[robots]]
+name = "r1"
+urdf = "package://example-robot-data/robots/ur_description/urdf/ur3_gripper.urdf"
+srdf = "package://example-robot-data/robots/ur_description/srdf/ur3_gripper.srdf"
+root_joint = "anchor"
+pose = [0.25, 0, 0, 0, 0, 1, 0]
+
+[[robots]]
+name = "ground"
+urdf = "package://hpp_environments/urdf/construction_set/ground.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/ground.srdf"
+root_joint = "anchor"
+
+[[robots]]
+name = "sphere0"
+urdf = "package://hpp_environments/urdf/construction_set/sphere.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/sphere.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "sphere1"
+urdf = "package://hpp_environments/urdf/construction_set/sphere.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/sphere.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "cylinder0"
+urdf = "package://hpp_environments/urdf/construction_set/cylinder_08.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/cylinder_08.srdf"
+root_joint = "freeflyer"
+
+[[robots]]
+name = "cylinder1"
+urdf = "package://hpp_environments/urdf/construction_set/cylinder_08.urdf"
+srdf = "package://hpp_environments/srdf/construction_set/cylinder_08.srdf"
+root_joint = "freeflyer"
+
+[joint_bounds]
+"r0/shoulder_pan_joint" = [-3.141592653589793, 4]
+"r1/shoulder_pan_joint" = [-3.141592653589793, 4]
+"r0/shoulder_lift_joint" = [-3.141592653589793, 0]
+"r1/shoulder_lift_joint" = [-3.141592653589793, 0]
+"r0/elbow_joint" = [-2.6, 2.6]
+"r1/elbow_joint" = [-2.6, 2.6]
+"sphere0/root_joint" = [
+  -1, 1, -1, 1, -0.1, 1, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001,
+]
+"sphere1/root_joint" = [
+  -1, 1, -1, 1, -0.1, 1, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001,
+]
+"cylinder0/root_joint" = [
+  -1, 1, -1, 1, -0.1, 1, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001,
+]
+"cylinder1/root_joint" = [
+  -1, 1, -1, 1, -0.1, 1, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001, -1.0001, 1.0001,
+]
+
+[constraints.place_sphere0]
+type = "transformation"
+joint2 = "sphere0/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints."place_sphere0/complement"]
+type = "transformation"
+joint2 = "sphere0/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [1, 1, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "Equality"]
+
+[constraints."place_sphere0/hold"]
+type = "locked_joint"
+joint = "sphere0/root_joint"
+value = [0, 0, 0.025, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "EqualToZero", "EqualToZero", "EqualToZero", "Equality"]
+
+[constraints.preplace_sphere0]
+type = "transformation"
+joint2 = "sphere0/root_joint"
+frame1 = [0, 0, 0.075, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints.place_sphere1]
+type = "transformation"
+joint2 = "sphere1/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints."place_sphere1/complement"]
+type = "transformation"
+joint2 = "sphere1/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [1, 1, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "Equality"]
+
+[constraints."place_sphere1/hold"]
+type = "locked_joint"
+joint = "sphere1/root_joint"
+value = [0, 0, 0.025, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "EqualToZero", "EqualToZero", "EqualToZero", "Equality"]
+
+[constraints.preplace_sphere1]
+type = "transformation"
+joint2 = "sphere1/root_joint"
+frame1 = [0, 0, 0.075, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints.place_cylinder0]
+type = "transformation"
+joint2 = "cylinder0/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints."place_cylinder0/complement"]
+type = "transformation"
+joint2 = "cylinder0/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [1, 1, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "Equality"]
+
+[constraints."place_cylinder0/hold"]
+type = "locked_joint"
+joint = "cylinder0/root_joint"
+value = [0, 0, 0.025, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "EqualToZero", "EqualToZero", "EqualToZero", "Equality"]
+
+[constraints.preplace_cylinder0]
+type = "transformation"
+joint2 = "cylinder0/root_joint"
+frame1 = [0, 0, 0.075, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints.place_cylinder1]
+type = "transformation"
+joint2 = "cylinder1/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[constraints."place_cylinder1/complement"]
+type = "transformation"
+joint2 = "cylinder1/root_joint"
+frame1 = [0, 0, 0.025, 0, 0, 0, 1]
+mask = [1, 1, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "Equality"]
+
+[constraints."place_cylinder1/hold"]
+type = "locked_joint"
+joint = "cylinder1/root_joint"
+value = [0, 0, 0.025, 0, 0, 0, 1]
+comparison = ["Equality", "Equality", "EqualToZero", "EqualToZero", "EqualToZero", "Equality"]
+
+[constraints.preplace_cylinder1]
+type = "transformation"
+joint2 = "cylinder1/root_joint"
+frame1 = [0, 0, 0.075, 0, 0, 0, 1]
+mask = [0, 0, 1, 1, 1, 0]
+comparison = ["EqualToZero", "EqualToZero", "EqualToZero"]
+
+[graph]
+name = "assembly"
+error_threshold = 0.0001
+max_iterations = 40
+grippers = [
+  "cylinder0/magnet0", "cylinder1/magnet0", "cylinder0/magnet1", "cylinder1/magnet1", "r0/gripper",
+  "r1/gripper",
+]
+objects = [
+  {name = "sphere0", handles = ["sphere0/handle", "sphere0/magnet"], contacts = []},
+  {name = "sphere1", handles = ["sphere1/handle", "sphere1/magnet"], contacts = []},
+  {name = "cylinder0", handles = ["cylinder0/handle"], contacts = []},
+  {name = "cylinder1", handles = ["cylinder1/handle"], contacts = []},
+]
+
+[graph.placements.sphere0]
+constraint = "place_sphere0"
+complement = "place_sphere0/complement"
+hold = "place_sphere0/hold"
+preplacement = "preplace_sphere0"
+
+[graph.placements.sphere1]
+constraint = "place_sphere1"
+complement = "place_sphere1/complement"
+hold = "place_sphere1/hold"
+preplacement = "preplace_sphere1"
+
+[graph.placements.cylinder0]
+constraint = "place_cylinder0"
+complement = "place_cylinder0/complement"
+hold = "place_cylinder0/hold"
+preplacement = "preplace_cylinder0"
+
+[graph.placements.cylinder1]
+constraint = "place_cylinder1"
+complement = "place_cylinder1/complement"
+hold = "place_cylinder1/hold"
+preplacement = "preplace_cylinder1"
+
+# One rule per state of the assembly sequence: these grasps and no other.
+[[graph.rules]]
+grippers = [
+  "cylinder0/magnet0", "cylinder1/magnet0", "cylinder0/magnet1", "cylinder1/magnet1", "r0/gripper",
+  "r1/gripper",
+]
+handles = ["^$", "^$", "^$", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r0/gripper", "cylinder0/magnet0", "cylinder1/magnet0", "cylinder0/magnet1", "cylinder1/magnet1",
+  "r1/gripper",
+]
+handles = ["sphere0/handle", "^$", "^$", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r0/gripper", "r1/gripper", "cylinder0/magnet0", "cylinder1/magnet0", "cylinder0/magnet1",
+  "cylinder1/magnet1",
+]
+handles = ["sphere0/handle", "cylinder0/handle", "^$", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r0/gripper", "r1/gripper", "cylinder0/magnet0", "cylinder1/magnet0", "cylinder0/magnet1",
+  "cylinder1/magnet1",
+]
+handles = ["sphere0/handle", "cylinder0/handle", "sphere0/magnet", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r1/gripper", "cylinder0/magnet0", "cylinder1/magnet0", "cylinder0/magnet1", "cylinder1/magnet1",
+  "r0/gripper",
+]
+handles = ["cylinder0/handle", "sphere0/magnet", "^$", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r1/gripper", "cylinder0/magnet0", "r0/gripper", "cylinder1/magnet0", "cylinder0/magnet1",
+  "cylinder1/magnet1",
+]
+handles = ["cylinder0/handle", "sphere0/magnet", "sphere1/handle", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r1/gripper", "cylinder0/magnet0", "r0/gripper", "cylinder0/magnet1", "cylinder1/magnet0",
+  "cylinder1/magnet1",
+]
+handles = ["cylinder0/handle", "sphere0/magnet", "sphere1/handle", "sphere1/magnet", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "r1/gripper", "cylinder0/magnet0", "cylinder0/magnet1", "cylinder1/magnet0", "cylinder1/magnet1",
+  "r0/gripper",
+]
+handles = ["cylinder0/handle", "sphere0/magnet", "sphere1/magnet", "^$", "^$", "^$"]
+link = true
+
+[[graph.rules]]
+grippers = [
+  "cylinder0/magnet0", "cylinder0/magnet1", "cylinder1/magnet0", "cylinder1/magnet1", "r0/gripper",
+  "r1/gripper",
+]
+handles = ["sphere0/magnet", "sphere1/magnet", "^$", "^$", "^$", "^$"]
+link = true
+
+[graph.security_margins]
+robots = ["r0", "r1", "sphere0", "sphere1", "cylinder0", "cylinder1"]
+default = 0.02
+
+[problem]
+steering_method = "Straight"
+# Progressive validation, without GraphPathValidation.
+path_validation = {type = "Progressive", tolerance = 0.02, graph = false}
+path_projector = {type = "Progressive", step = 0.05}
+config_validations = ["CollisionValidation"]
+
+# Arms at (pi/6, -pi/2, pi/2); spheres and cylinders on the ground, assembled in the goal.
+[init.joints]
+"r0/shoulder_pan_joint" = 0.5235987755982988
+"r0/shoulder_lift_joint" = -1.5707963267948966
+"r0/elbow_joint" = 1.5707963267948966
+"r1/shoulder_pan_joint" = 0.5235987755982988
+"r1/shoulder_lift_joint" = -1.5707963267948966
+"r1/elbow_joint" = 1.5707963267948966
+"sphere0/root_joint" = [0, -0.07999999999999999, 0.025, 0, 0, 0, 1]
+"sphere1/root_joint" = [-0.05, -0.16, 0.025, 0, 0, 0, 1]
+"cylinder0/root_joint" = [0.45, -0.16, 0.025, 0, 0, 0, 1]
+"cylinder1/root_joint" = [0.5, -0.07999999999999999, 0.025, 0, 0, 0, 1]
+
+[goal.joints]
+"r0/shoulder_pan_joint" = 0.5235987755982988
+"r0/shoulder_lift_joint" = -1.5707963267948966
+"r0/elbow_joint" = 1.5707963267948966
+"r1/shoulder_pan_joint" = 0.5235987755982988
+"r1/shoulder_lift_joint" = -1.5707963267948966
+"r1/elbow_joint" = 1.5707963267948966
+"sphere0/root_joint" = [
+  -0.06202136144745322, -0.15, 0.025, 0.7071067811865476, 0, -0.7071067811865476, 0,
+]
+"sphere1/root_joint" = [
+  0.06202136144745322, -0.15, 0.025, 0.7071067811865476, 0, 0.7071067811865476, 0,
+]
+"cylinder0/root_joint" = [0, -0.15, 0.025, 0, 0, 0, 1]
+"cylinder1/root_joint" = [0.5, -0.08, 0.025, 0, 0, 0, 1]
+
+[planner]
+type = "ManipulationPlanner"
+max_iterations = 5000
